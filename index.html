@@ -1,0 +1,259 @@
+<!-- FRONTEND PAGE FOR VIEWING AND CREATING NEW BLOCKS IN CHAIN -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HippoCoin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body class="min-vh-100 background">
+        <div class="row min-vh-100 justify-content-center align-items-center text-light py-5">
+            <div class="col text-center justify-content-center align-items-center">
+                <div class="ms-4">
+                    <!-- Logo for HippoCoin -->
+                    <img src="images/HippoCoin_Logo.png" alt="HippoCoin Logo" class="img-fluid rounded-circle" width="200px" height="200px">
+                    <h1 class="text-light display-1 fw-bold">HippoCoin</h1>
+                    <!-- Description -->
+                    <h3 class="fw-bold text-secondary">The Future of Digital Currency</h3>
+                </div>
+            </div>
+                    
+            <div class="col justify-content-center align-items-center text-center">
+                    
+                    <!-- Buttons to create a new block in the chain and to view the entire chain -->
+                   <div class="bg-dark text-light rounded p-4 shadow-lg w-75 mx-auto">
+                    <h2 class="fw-bold text-light mb-3">Get Started!</h2>
+                    <p class="text-secondary mb-4">
+                        Send coins, record transactions, and watch the blockchain grow in real-time. Click a button to begin!
+                    </p>
+            
+                    <div class="d-grid gap-3">
+                        <button id="btnOpenModalCreateBlock" data-bs-toggle="modal" data-bs-target="#mdlCreateBlock" class="btn btn-primary btn-lg shadow">
+                            <i class="bi bi-plus-circle"></i> Create New Block
+                        </button>
+            
+                        <button id="btnViewChain" class="btn btn-outline-light btn-lg shadow">
+                            <i class="bi bi-eye"></i> View Blockchain
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section for viewing the blockchain hidden on default -->
+        <div class="container mt-5" id="blockchainSection" style="display: none;">
+            <h2 class="text-center text-light">HippoCoin Blockchain</h2>
+            <div id="blockchainContent" class="text-light">
+                <!-- Blockchain content will be dynamically inserted here -->
+            </div>
+
+            <div class="d-flex justify-content-center">
+                <button id="btnCloseChainBottom" class="btn btn-danger btn-lg mt-3 mb-3">Close Blockchain</button>
+            </div>
+        </div>
+
+        <!-- Modal to Create a new block -->
+        <div class="modal fade" id="mdlCreateBlock" tabindex="-1" aria-labelledby="mdlCreateBlockLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="mdlCreateBlockLabel">HippoCoin | Add a New Block</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Input for the necessary data for the new block in the chain -->
+                    <h3 class="text-center text-dark">Enter Transaction Details</h3>
+                    
+                    <div class="input-group mt-4 mb-3">
+                        <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                        <div class="form-floating">
+                            <input id="txtSenderName" type="text" class="form-control shadow" aria-label="First Name of Sender">
+                            <label for="txtSenderName">Sender Name</label>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                        <div class="form-floating">
+                            <input id="txtReceiverName" type="text" class="form-control shadow" aria-label="First Name of Receiver">
+                            <label for="txtReceiverName">Recipient Name</label>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-currency-bitcoin"></i></span>
+                        <div class="form-floating">
+                            <input id="txtAmount" type="number" class="form-control shadow" aria-label="Amount of Coins">
+                            <label for="txtAmount">Amount</label>
+                        </div>
+                    </div>                            
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" id="btnCreateNewBlock" class="btn btn-primary">Create Block!</button>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        let baseApiUrl = "http://127.0.0.1:8000"
+
+        // Function to create a new block in the chain
+        function createNewBlock() {
+            const strSenderName = document.getElementById("txtSenderName").value;
+            const strReceiverName = document.getElementById("txtReceiverName").value;
+            const numAmount = document.getElementById("txtAmount").value;
+
+            // Validate the input fields to ensure they are not empty
+            if (strSenderName === "" || strReceiverName === "" || numAmount === "") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please fill in all fields!'
+                });
+                return;
+            }
+            
+            // Validate the amount to be a positive number
+            if (isNaN(numAmount) || numAmount <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter a valid amount!'
+                });
+                return;
+            }
+
+            // POST request to create a new block in the chain
+            fetch(baseApiUrl + "/chain", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    strTransSender: strSenderName,
+                    strTransRecipient: strReceiverName,
+                    decTransAmt: numAmount
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'New block created successfully!',
+                        confirmButtonText: 'OK'
+                    })
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops there was an error in creating the block.',
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'An error occurred while creating the block. Please try again later.'
+                });
+            });
+        }
+
+        // Event listener for the "Create Block" button
+        document.getElementById("btnCreateNewBlock").addEventListener("click", function(event) {
+            event.preventDefault();
+            createNewBlock();
+        });
+
+
+
+        // Event listener for the "View Blockchain" button
+        document.getElementById("btnViewChain").addEventListener("click", function() {
+            const blockchainSection = document.getElementById("blockchainSection");
+            if (blockchainSection.style.display === "none") {
+                blockchainSection.style.display = "block";
+
+                // Change button text to "Hide Blockchain"
+                this.innerHTML = '<i class="bi bi-eye-slash"></i> Hide Blockchain';
+
+                //shift screen down to view the blockchain section
+                window.scrollTo({
+                    top: blockchainSection.offsetTop,
+                    behavior: 'smooth'
+                });
+
+                fetchBlockchainData();
+
+            } else {
+                blockchainSection.style.display = "none";
+                this.innerHTML = '<i class="bi bi-eye"></i> View Blockchain'; // Change button text back to "View Blockchain"
+            }
+        });
+
+        // Function to fetch and display the blockchain data
+        function fetchBlockchainData() {
+            fetch(baseApiUrl + "/chain", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+
+                    // Display the blockchain data in the section
+                    const blockchainContent = document.getElementById("blockchainContent");
+                    blockchainContent.innerHTML = ""; // Clear previous content
+                    data.chain.forEach(block => {
+                        const blockDiv = document.createElement("div");
+                        blockDiv.className = "block";
+                        blockDiv.innerHTML = `<div class="card text-light bg-dark border-info mb-4 shadow">
+                                                <div class="card-header fw-bold">
+                                                    Block #${block.index}
+                                                </div>
+                                                <div class="card-body">
+                                                    <p><strong>Timestamp:</strong> ${block.time}</p>
+                                                    <p><strong>From:</strong> ${block.transaction.strTransSender}</p>
+                                                    <p><strong>To:</strong> ${block.transaction.strTransRecipient}</p>
+                                                    <p><strong>Amount:</strong> ${block.transaction.decTransAmt} HippoCoins</p>
+                                                    <hr>
+                                                    <p><strong>Nonce:</strong> ${block.nonce}</p>
+                                                    <p><strong>Hash:</strong> <code>${block.hash}</code></p>
+                                                    <p><strong>Previous Hash:</strong> <code>${block.previousHash}</code></p>
+                                                </div>
+                                            </div>`;
+                        blockchainContent.appendChild(blockDiv);
+                    });
+                } else {
+                    console.error('Error fetching blockchain data:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Event listener for the "Close Blockchain" button
+        document.getElementById("btnCloseChainBottom").addEventListener("click", function() {
+            const blockchainSection = document.getElementById("blockchainSection");
+            blockchainSection.style.display = "none";
+
+            // Change button text back to "View Blockchain"
+            document.getElementById("btnViewChain").innerHTML = '<i class="bi bi-eye"></i> View Blockchain'; 
+        });
+
+    </script>
+</body>
+</html>

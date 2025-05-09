@@ -1,0 +1,46 @@
+html, body {
+    width: 100%;
+    height:100%;
+}
+
+body {
+    background: linear-gradient(-45deg, #000000, #080649, #000000);
+    background-size: 300% 300%;
+    animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.btn-lg {
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #5f0fff, #7b2ff7);
+    border: none;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #7b2ff7, #5f0fff);
+    box-shadow: 0 0 15px rgba(123, 47, 247, 0.6);
+    transform: scale(1.03);
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: #fff;
+    transform: scale(1.03);
+}
